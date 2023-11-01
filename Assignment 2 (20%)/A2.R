@@ -1,0 +1,103 @@
+setwd("D:/Documents/Collection/3-SEM_2/FIT2086/Assignment 2 (20%)")
+# Load the data
+df <- read.csv("covid.19.ass2.2023.csv")
+
+# Question 1A
+df_mean <- mean(df$Recovery.Time)
+df_sd <- sd(df$Recovery.Time)
+df_var <- var(df$Recovery.Time)
+se <- df_sd / sqrt(length(df$Recovery.Time))
+t_critical <- qt(1 - 0.05/2, df = length(df$Recovery.Time) - 1)
+margin_of_error <- t_critical * se
+upper_limit <- df_mean + margin_of_error
+lower_limit <- df_mean - margin_of_error
+df_mean
+cat("[", lower_limit, ",", upper_limit, "]\n")
+
+
+# Question 1B
+israeli_df <- read.csv("israeli.covid.19.ass2.2023.csv")
+israeli_mean <- mean(israeli_df$Recovery.Time)
+israeli_var <- var(israeli_df$Recovery.Time)
+mean_difference <- israeli_mean - df_mean
+se_difference <- sqrt((df_var / length(df$Recovery.Time))
+                      + (israeli_var / length(israeli_df$Recovery.Time)))
+
+margin_of_error <- t_critical * se_difference
+diff_upper_limit <- mean_difference + margin_of_error
+diff_lower_limit <- mean_difference - margin_of_error
+mean_difference
+cat("[", diff_lower_limit, ",", diff_upper_limit, "]\n")
+
+
+# Question 1C
+# Calculate test statistic (two-tailed test)
+test_statistic <- (israeli_mean - df_mean) / se_difference
+2 * pnorm(-abs(test_statistic))
+
+
+# Question 2A
+library(ggplot2)
+
+# Set Values of y and values of v
+y <- seq(0, 10, by = 0.001)
+v_values <- c(1, 0.5, 2)
+data <- data.frame()
+
+# Calculate the probability density for each y and v and make it data set
+for (v in v_values) {
+  density <- exp((-exp(-v) * y) - v)
+  data <- rbind(data, data.frame(y = y, density = density, v = as.factor(v)))
+}
+
+# Plot data set
+ggplot(data, aes(x = y, y = density, color = v)) +
+  geom_line() +
+  labs(
+    x = "y",
+    y = "Probability Density",
+    title = "Exponential Probability Density Function",
+  ) +
+  scale_color_manual(
+    values = c("1" = "red", "0.5" = "yellow", "2" = "blue"),
+    labels = c("v = 1", "v = 0.5", "v = 2")
+  )+
+  scale_y_continuous(breaks = seq(0, 0.7, by = 0.05))
+
+
+# Question 3A
+n <- 124
+x <- 80
+
+p <- x / n
+# Calculate the standard error
+se <- sqrt((p * (1 - x / n)) / n)
+
+# Calculate the confidence interval
+lower <- p - 1.96 * se
+upper <- p + 1.96 * se
+
+# Display the results
+p
+cat("[", lower, ",", upper, "]\n")
+
+
+# Question 3B
+p_0 <- 0.5
+z <- (p - p_0) / sqrt((p_0 * (1 - p_0)) / n)
+p_value <- 2 * (pnorm(-abs(z)))
+z
+p_value
+
+# Question 3C
+binom.test(x, n, p = 0.5)$p.value
+
+
+# Question 3D
+p_head <- x/n
+p_hand <- 83/(83+17)
+p_hat <- (x+83)/(n+83+17)
+z <- (p_hand - p_head) / sqrt(p_hat*(1 - p_hat)*(1/n + 1/(83+17)))
+z
+2 * (pnorm(-abs(z)))
+
